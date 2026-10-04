@@ -1,0 +1,8 @@
+services:
+  nuxt-prod:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.prod
+    env_file: .env
+    ports:
+      - "127.0.0.1:${FRONTEND_PORT:-3000}:3000"

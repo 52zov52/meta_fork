@@ -1,0 +1,27 @@
+# Show available recipes
+default:
+  @just --list
+
+# Open shell in dev container
+shell:
+  docker compose exec -it nuxt-dev sh
+
+# Clean all dependencies and build artifacts
+clean:
+  rm -rf node_modules/ .nuxt/ .pnpm-store/ .output/
+
+# Hard reset to branch (destructive - use with care)
+clean-branch name="main":
+  git fetch && git reset --hard origin/{{name}}
+
+# Update production (run after switching branch)
+build-prod:
+  pnpm install --frozen-lockfile
+  pnpm build
+  mkdir -p tmp && touch tmp/restart.txt
+  sleep 360
+  rm -rf tmp
+
+# Check Nuxt UI default lucide icons are bundled
+check-icons-defaults:
+  node scripts/check-nuxt-ui-icons.mjs

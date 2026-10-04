@@ -1,0 +1,13 @@
+*
+
+!app/
+!public/
+!server/
+
+!package.json
+!pnpm-lock.yaml
+!pnpm-workspace.yaml
+
+!nuxt.config.ts
+!tsconfig.json
+!eslint.config.mjs
