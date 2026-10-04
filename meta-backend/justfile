@@ -1,0 +1,65 @@
+set dotenv-load
+set shell := ["bash", "-eu", "-o", "pipefail", "-c"]
+
+APP_UID := env("APP_UID", "1000")
+APP_GID := env("APP_GID", "1000")
+
+IMAGE_NAME := "meta-backend-php-fpm"
+IMAGE_TAG  := "latest"
+IMAGE      := IMAGE_NAME + ":" + IMAGE_TAG
+
+# Show available recipes
+default:
+  @just --list
+
+# Build Docker image
+build:
+  docker build -f docker/Dockerfile \
+    --build-arg UID={{APP_UID}} \
+    --build-arg GID={{APP_GID}} \
+    -t {{IMAGE}} .
+
+# Open shell in PHP-FPM container
+shell:
+  docker compose exec --user www php-fpm bash
+
+# Generate API documentation
+docs *args:
+  docker compose exec --user www php-fpm php artisan scribe:generate {{ args }}
+
+# Regenerate DB and docs
+docs-fresh:
+  just db && just docs --force
+
+# Reset database with fresh migration and seeding
+db:
+  docker compose exec --user www php-fpm php artisan migrate:fresh --seed
+
+# Run tests
+test:
+  docker compose exec --user www php-fpm php artisan test
+
+# Run Pint
+lint:
+  docker compose exec --user www php-fpm php ./vendor/bin/pint
+
+# Hard reset to branch (destructive - use with care)
+clean-branch name="main":
+  git fetch && git reset --hard origin/{{name}}
+
+# Update production (run after switching branch)
+update-prod:
+  composer install --no-dev --optimize-autoloader --no-interaction
+  php artisan optimize:clear
+  php artisan optimize
+  mkdir -p tmp && touch tmp/restart.txt
+  sleep 360
+  rm -rf tmp
+
+# Generate API documentation and create distributable archive (static type)
+docs-static:
+  @docker compose up -d && sleep 1
+  docker compose exec --user www php-fpm bash -c "SCRIBE_TYPE=static SCRIBE_THEME=elements php artisan scribe:generate"
+  docker compose exec --user www php-fpm bash -c "cd public/docs && zip -r ../../api-docs.zip ."
+  docker compose down
+  @echo "✓ Archive: api-docs.zip ($(du -h api-docs.zip | cut -f1))"

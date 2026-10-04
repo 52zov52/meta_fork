@@ -1,0 +1,54 @@
+# Environment files
+.env
+.env.testing
+.env.backup
+.env.production
+auth.json
+Homestead.yaml
+Homestead.json
+
+# Vendor / dependencies
+/vendor
+/composer/
+.composer/
+
+# Laravel storage and cache
+/storage/*.key
+/storage/pail
+/storage/framework/*
+!/storage/framework/.gitignore
+/storage/logs/*
+!/storage/logs/.gitignore
+/public/storage
+
+# Build artifacts
+/public/build
+/public/hot
+/public/docs
+/bootstrap/cache/*
+!/bootstrap/cache/.gitignore
+
+# Testing / cache
+.phpunit.result.cache
+/.phpunit.cache
+
+# Editor / IDE
+/.idea
+/.vscode
+.phpactor.json
+.scribe/
+
+# AI
+.aider*
+.cursor
+
+# System / logs
+*.log
+.DS_Store
+Thumbs.db
+.bash_history
+
+# Custom
+meta-backend-php-fpm_latest.tar.gz
+.hashes/
+api-docs.zip
